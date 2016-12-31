@@ -3,6 +3,8 @@ package negroni
 import (
 	"bytes"
 
+	"github.com/fatih/color"
+
 	"log"
 	"net/http"
 	"os"
@@ -32,7 +34,7 @@ var LoggerDefaultDateFormat = time.RFC3339
 
 // ALogger interface
 type ALogger interface {
-	Println(v ...interface{})
+	Print(v ...interface{})
 	Printf(format string, v ...interface{})
 }
 
@@ -51,6 +53,9 @@ func NewLogger() *Logger {
 	return logger
 }
 
+func (l *Logger) SetAppName(name string) {
+	l.ALogger = log.New(os.Stdout, name+" ", 0)
+}
 func (l *Logger) SetFormat(format string) {
 	l.template = template.Must(template.New("negroni_parser").Parse(format))
 }
@@ -76,5 +81,8 @@ func (l *Logger) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.Ha
 
 	buff := &bytes.Buffer{}
 	l.template.Execute(buff, log)
-	l.Printf(buff.String())
+
+	d := color.New(color.FgCyan, color.Bold)
+	d.Printf(buff.String())
+
 }
